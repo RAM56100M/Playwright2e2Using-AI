@@ -3,13 +3,11 @@ import { DashboardPage } from '../../pages/dashboard.page';
 import { testUsers, testUrls } from '../../utils/test-data';
 
 test.describe('Dashboard Functionality', () => {
+  test.use({ storageState: 'playwright/.auth/user.json' });
+
   let dashboardPage: DashboardPage;
 
-  test.beforeEach(async ({ page, context }) => {
-    // Load authenticated state
-    const cookies = await context.storageState({ path: 'playwright/.auth/user.json' });
-    await context.addCookies(cookies.cookies || []);
-
+  test.beforeEach(async ({ page }) => {
     dashboardPage = new DashboardPage(page);
     await dashboardPage.goto();
   });
@@ -23,9 +21,8 @@ test.describe('Dashboard Functionality', () => {
     await dashboardPage.expectUserGreeting();
   });
 
-  test('should have working logout button', async ({ page }) => {
+  test('should have working logout button', async () => {
     await dashboardPage.logout();
-    // Should redirect to login or home page
     const currentUrl = await dashboardPage.getCurrentUrl();
     expect(
       currentUrl.includes(testUrls.login) || currentUrl.includes(testUrls.home)
@@ -39,7 +36,7 @@ test.describe('Dashboard Functionality', () => {
     await expect(profileHeading).toBeVisible();
   });
 
-  test('should maintain dashboard state on page refresh', async ({ page }) => {
+  test('should maintain dashboard state on page refresh', async () => {
     const headingBefore = await dashboardPage.getHeadingText();
     await dashboardPage.refresh();
     const headingAfter = await dashboardPage.getHeadingText();

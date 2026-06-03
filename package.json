@@ -4,6 +4,7 @@
   "description": "Comprehensive Playwright end-to-end testing framework with Page Object Model",
   "scripts": {
     "test": "playwright test",
+    "typecheck": "tsc --noEmit",
     "test:headed": "playwright test --headed",
     "test:ui": "playwright test --ui",
     "test:debug": "playwright test --debug",
@@ -28,6 +29,7 @@
   "devDependencies": {
     "@playwright/test": "^1.45.0",
     "@types/node": "^25.9.1",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "typescript": "^5.9.3"
   }
 }

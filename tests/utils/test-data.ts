@@ -5,13 +5,13 @@
 
 export const testUsers = {
   validUser: {
-    email: 'rampp@gmail.com',
-    password: 'Track20021',
+    email: process.env.TEST_USER_EMAIL || 'user@example.com',
+    password: process.env.TEST_USER_PASSWORD || 'SecurePass123!',
     name: 'Test User',
   },
   validAdmin: {
-    email: 'rampp@gmail.com',
-    password: 'Track20021',
+    email: process.env.TEST_ADMIN_EMAIL || process.env.TEST_USER_EMAIL || 'admin@example.com',
+    password: process.env.TEST_ADMIN_PASSWORD || process.env.TEST_USER_PASSWORD || 'SecurePass123!',
     name: 'Admin User',
   },
   invalidUser: {
@@ -25,7 +25,7 @@ export const testUsers = {
 };
 
 export const errorMessages = {
-  invalidCredentials: 'Invalid email or password',
+  invalidCredentials: 'Incorrect email or password.',
   emptyEmail: 'Email is required',
   emptyPassword: 'Password is required',
   invalidEmail: 'Please enter a valid email',
@@ -41,9 +41,9 @@ export const successMessages = {
 };
 
 export const testUrls = {
-  login: '/#/auth/login',
-  dashboard: '/#/dashboard',
-  signup: '/#/auth/signup',
-  forgotPassword: '/#/auth/forgot-password',
-  home: '/',
+  login: '/client/#/auth/login',
+  dashboard: '/client/#/dashboard',
+  signup: '/client/#/auth/signup',
+  forgotPassword: '/client/#/auth/forgot-password',
+  home: '/client',
 };

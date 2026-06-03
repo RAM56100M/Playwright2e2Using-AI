@@ -28,7 +28,7 @@ export class LoginPage extends BasePage {
    * Navigate to login page
    */
   async goto(): Promise<void> {
-    await this.page.goto('https://rahulshettyacademy.com/client/#/auth/login');
+    await this.navigate('/client/#/auth/login');
   }
 
   /**
@@ -52,8 +52,7 @@ export class LoginPage extends BasePage {
    * Verify login was successful
    */
   async expectLoginSuccess(): Promise<void> {
-    // Wait for navigation to dashboard
-    await this.page.waitForURL('**/#/dashboard/**', { timeout: 10000 });
+    await expect(this.page).toHaveURL(/.*\/#\/dashboard.*/);
   }
 
   /**

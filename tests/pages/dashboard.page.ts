@@ -25,14 +25,14 @@ export class DashboardPage extends BasePage {
    * Navigate to dashboard
    */
   async goto(): Promise<void> {
-    await this.navigate('/dashboard');
+    await this.navigate('/client/#/dashboard');
   }
 
   /**
    * Verify dashboard is loaded successfully
    */
   async expectDashboardLoaded(): Promise<void> {
-    await expect(this.page).toHaveURL('/dashboard');
+    await expect(this.page).toHaveURL(/.*\/#\/dashboard.*/);
     await expect(this.welcomeHeading).toBeVisible();
   }
 
@@ -71,6 +71,6 @@ export class DashboardPage extends BasePage {
    * Get the heading text
    */
   async getHeadingText(): Promise<string> {
-    return this.welcomeHeading.textContent() || '';
+    return (await this.welcomeHeading.textContent()) || '';
   }
 }

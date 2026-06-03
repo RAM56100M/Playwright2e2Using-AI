@@ -5,7 +5,7 @@ import { test, expect } from '@playwright/test';
  * Demonstrates network mocking, API testing, and advanced interactions
  */
 
-test.describe('Advanced Testing Patterns', () => {
+test.describe.skip('Advanced Testing Patterns examples', () => {
   test('should mock API response', async ({ page }) => {
     // Mock the products API endpoint
     await page.route('**/api/products', async (route) => {

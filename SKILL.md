@@ -79,9 +79,9 @@ async function deleteTestData() {
 
 1. Create a `.env.local` file (add to `.gitignore`):
    ```
-   TEST_USER_EMAIL=rampp@gmail.com
-   TEST_USER_PASSWORD=Track20021
-   TEST_BASE_URL=https://rahulshettyacademy.com/client
+   TEST_USER_EMAIL=your-test-user@example.com
+   TEST_USER_PASSWORD=replace-with-test-password
+   BASE_URL=https://example.test
    ```
 
 2. Load environment in `playwright.config.ts`:
@@ -91,7 +91,7 @@ async function deleteTestData() {
 
    export default defineConfig({
      use: {
-       baseURL: process.env.TEST_BASE_URL,
+       baseURL: process.env.BASE_URL,
      },
    });
    ```

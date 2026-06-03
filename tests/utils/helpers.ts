@@ -113,9 +113,9 @@ export async function fillAndVerify(
 ): Promise<void> {
   const locator = page.locator(selector);
   await locator.fill(value);
-  await locator.evaluate((el: HTMLInputElement) => {
-    if (el.value !== value) {
-      throw new Error(`Expected value "${value}" but got "${el.value}"`);
+  await locator.evaluate((el: HTMLInputElement, expectedValue) => {
+    if (el.value !== expectedValue) {
+      throw new Error(`Expected value "${expectedValue}" but got "${el.value}"`);
     }
-  });
+  }, value);
 }

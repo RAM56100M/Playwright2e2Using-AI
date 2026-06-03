@@ -1,4 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 /**
  * Playwright configuration file
@@ -28,27 +31,27 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
-      // dependencies: ['setup'],
+      dependencies: ['setup'],
     },
     {
       name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
-      // dependencies: ['setup'],
+      dependencies: ['setup'],
     },
     {
       name: 'webkit',
       use: { ...devices['Desktop Safari'] },
-      // dependencies: ['setup'],
+      dependencies: ['setup'],
     },
     {
       name: 'mobile-chrome',
       use: { ...devices['Pixel 5'] },
-      // dependencies: ['setup'],
+      dependencies: ['setup'],
     },
     {
       name: 'mobile-safari',
       use: { ...devices['iPhone 13'] },
-      // dependencies: ['setup'],
+      dependencies: ['setup'],
     },
   ],
   // Note: webServer is not needed for testing external applications

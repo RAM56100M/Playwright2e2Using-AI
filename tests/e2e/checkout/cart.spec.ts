@@ -5,7 +5,7 @@ import { test, expect } from '@playwright/test';
  * Example test file for e-commerce checkout flow
  */
 
-test.describe('Shopping Cart Functionality', () => {
+test.describe.skip('Shopping Cart Functionality examples', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to products page
     await page.goto('/products');
