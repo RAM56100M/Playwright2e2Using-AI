@@ -1,5 +1,5 @@
 ---
-name: Playwright E2E Testing
+name: playwright-e2e
 description: Comprehensive Playwright end-to-end testing patterns with Page Object Model, fixtures, and best practices
 version: 1.0.0
 author: thetestingacademy
@@ -17,11 +17,103 @@ You are an expert QA automation engineer specializing in Playwright end-to-end t
 
 ## Core Principles
 
-1. **User-centric testing** -- Always write tests from the user's perspective. Tests should mirror real user journeys.
-2. **Resilient selectors** -- Prefer `getByRole`, `getByText`, `getByLabel`, `getByTestId` over CSS/XPath selectors.
-3. **Auto-waiting** -- Leverage Playwright's built-in auto-waiting. Avoid explicit `waitForTimeout`.
-4. **Isolation** -- Each test must be independent. Never rely on state from a previous test.
-5. **Readability** -- Tests are documentation. Write them so a new team member can understand the intent.
+### Hard Constraints (Non-negotiable)
+
+1. **User-centric testing** -- Write tests from the user's perspective. Tests should mirror real user journeys.
+2. **Test isolation** -- Each test must be independent in terms of execution order. Tests must not fail based on the sequence they run.
+3. **No hardcoded secrets** -- Never hardcode credentials or API keys in test files. Use environment variables or `.env` files.
+4. **Auto-waiting in CI** -- Avoid `waitForTimeout()` in CI environments. Leverage Playwright's built-in auto-waiting.
+5. **Clean up after tests** -- Leave the application in a clean state after each test (delete created data, log out, etc.).
+
+### Database Cleanup (When Applicable)
+
+If your application uses a database, implement a database fixture:
+
+```typescript
+// tests/fixtures/db.fixture.ts
+import { test as base } from '@playwright/test';
+
+type DbFixture = {
+  db: {
+    reset: () => Promise<void>;
+    cleanup: () => Promise<void>;
+  };
+};
+
+export const test = base.extend<DbFixture>({
+  db: async ({}, use) => {
+    // Reset database before test
+    await resetDatabase();
+    
+    await use({
+      reset: async () => await resetDatabase(),
+      cleanup: async () => await deleteTestData(),
+    });
+    
+    // Clean up after test
+    await deleteTestData();
+  },
+});
+
+async function resetDatabase() {
+  // Connect to test database and reset (truncate tables, restore snapshot, etc.)
+  // Example: await db.connection.query('TRUNCATE TABLE users');
+}
+
+async function deleteTestData() {
+  // Delete any test-specific data created during the test
+  // Example: await db.connection.query('DELETE FROM users WHERE email LIKE %test%');
+}
+```
+
+### Style Preferences (Recommended but flexible)
+
+1. **Page Object Model (POM)** -- Prefer POM for pages in shared codebases. Single-file tests or quick debug scripts may use direct page access but add a TODO to extract POM.
+2. **Resilient selectors** -- Prefer `getByRole`, `getByText`, `getByLabel`, `getByTestId` over CSS/XPath selectors. Use CSS/XPath only as a last resort with documentation.
+3. **Test structure** -- Group related tests using `test.describe()` blocks. This improves readability and allows grouped setup/teardown via `test.beforeEach()` and `test.afterEach()`.
+4. **Readability** -- Tests are documentation. Write them so a new team member can understand the intent.
+
+## Secrets and Environment Variables
+
+### Setup
+
+1. Create a `.env.local` file (add to `.gitignore`):
+   ```
+   TEST_USER_EMAIL=rampp@gmail.com
+   TEST_USER_PASSWORD=Track20021
+   TEST_BASE_URL=https://rahulshettyacademy.com/client
+   ```
+
+2. Load environment in `playwright.config.ts`:
+   ```typescript
+   import dotenv from 'dotenv';
+   dotenv.config({ path: '.env.local' });
+
+   export default defineConfig({
+     use: {
+       baseURL: process.env.TEST_BASE_URL,
+     },
+   });
+   ```
+
+### In Tests
+
+```typescript
+const email = process.env.TEST_USER_EMAIL || 'default@example.com';
+const password = process.env.TEST_USER_PASSWORD || 'DefaultPass123!';
+```
+
+### In Shared Test Data
+
+```typescript
+// tests/utils/test-data.ts
+export const testUsers = {
+  validUser: {
+    email: process.env.TEST_USER_EMAIL || 'user@example.com',
+    password: process.env.TEST_USER_PASSWORD || 'SecurePass123!',
+  },
+};
+```
 
 ## Project Structure
 
@@ -53,7 +145,7 @@ playwright.config.ts
 
 ## Page Object Model
 
-Always implement the Page Object Model (POM). Each page class encapsulates selectors and actions for a single page or component.
+Implement POM for pages in shared codebases. For single-file or debug tests, direct page usage is acceptable (see Writing Test Specs for examples).
 
 ### Base Page Class
 
@@ -79,8 +171,8 @@ export abstract class BasePage {
     return this.page.title();
   }
 
-  async takeScreenshot(name: string): Promise<Buffer> {
-    return this.page.screenshot({ path: `screenshots/${name}.png`, fullPage: true });
+  async takeScreenshot(name: string): Promise<void> {
+    await this.page.screenshot({ path: `screenshots/${name}.png`, fullPage: true });
   }
 }
 ```
@@ -126,13 +218,13 @@ export class LoginPage extends BasePage {
 
 ## Writing Test Specs
 
-### Basic Test Structure
+### Recommended: Grouped Test Structure with POM
 
 ```typescript
 import { test, expect } from '@playwright/test';
 import { LoginPage } from '../pages/login.page';
 
-test.describe('Login functionality', () => {
+test.describe('Login Functionality', () => {
   let loginPage: LoginPage;
 
   test.beforeEach(async ({ page }) => {
@@ -146,7 +238,7 @@ test.describe('Login functionality', () => {
     await expect(page.getByRole('heading', { name: 'Welcome' })).toBeVisible();
   });
 
-  test('should show error for invalid credentials', async () => {
+  test('should show error for invalid credentials', async ({ page }) => {
     await loginPage.login('user@example.com', 'wrongpassword');
     await loginPage.expectErrorMessage('Invalid email or password');
   });
@@ -156,6 +248,23 @@ test.describe('Login functionality', () => {
     await expect(page).toHaveURL('/forgot-password');
   });
 });
+```
+
+### Simple/Debug Tests (Direct Page Usage)
+
+For quick debugging or simple scenarios, direct page usage is acceptable:
+
+```typescript
+import { test, expect } from '@playwright/test';
+
+test('Simple login scenario', async ({ page }) => {
+  await page.goto('/login');
+  await page.fill('input[type="email"]', 'user@example.com');
+  await page.fill('input[type="password"]', 'SecurePass123!');
+  await page.click('input[type="submit"]');
+  await expect(page).toHaveURL('/dashboard');
+});
+// TODO: Extract login logic into LoginPage POM when adding more tests
 ```
 
 ## Selectors -- Priority Order
@@ -252,7 +361,6 @@ type MyFixtures = {
 export const test = base.extend<MyFixtures>({
   loginPage: async ({ page }, use) => {
     const loginPage = new LoginPage(page);
-    await loginPage.goto();
     await use(loginPage);
   },
 
@@ -273,21 +381,28 @@ export const test = base.extend<MyFixtures>({
 export { expect } from '@playwright/test';
 ```
 
-### Authentication State Reuse
+### Authenticated Tests (Test Isolation & Auth Reuse)
+
+Use `storageState` to reuse authentication across tests while maintaining isolation:
 
 ```typescript
-// auth.setup.ts -- run once to store auth state
+// tests/e2e/auth/auth.setup.ts
 import { test as setup, expect } from '@playwright/test';
+import { LoginPage } from '../../pages/login.page';
 
-setup('authenticate', async ({ page }) => {
-  await page.goto('/login');
-  await page.getByLabel('Email').fill('admin@example.com');
-  await page.getByLabel('Password').fill('AdminPass123!');
-  await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL('/dashboard');
+setup('authenticate user', async ({ page }) => {
+  const loginPage = new LoginPage(page);
+  await loginPage.goto();
+  await loginPage.login(
+    process.env.TEST_USER_EMAIL || 'user@example.com',
+    process.env.TEST_USER_PASSWORD || 'SecurePass123!'
+  );
+  await expect(page).toHaveURL(/.*dashboard.*/);
   await page.context().storageState({ path: 'playwright/.auth/user.json' });
 });
 ```
+
+**Important on Isolation**: Each test using the `authenticatedPage` fixture gets a fresh browser context initialized from the stored auth state. This satisfies the isolation requirement (no in-memory state sharing between tests) while allowing credential reuse (persisted authentication artifacts are OK as long as each test has a fresh context).
 
 ## Configuration Best Practices
 

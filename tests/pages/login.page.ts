@@ -15,11 +15,11 @@ export class LoginPage extends BasePage {
 
   constructor(page: Page) {
     super(page);
-    // For Rahul Shetty Academy - try multiple selector approaches
-    this.emailInput = page.locator('input[type="email"]').first();
-    this.passwordInput = page.locator('input[type="password"]').first();
-    this.submitButton = page.getByRole('button', { name: /login|sign in/i }).first();
-    this.errorMessage = page.locator('.error, [role="alert"]').first();
+    // For Rahul Shetty Academy - use correct input selectors
+    this.emailInput = page.locator('input[type="email"]');
+    this.passwordInput = page.locator('input[type="password"]');
+    this.submitButton = page.locator('input[type="submit"][name="login"]');
+    this.errorMessage = page.locator('.error, [role="alert"]');
     this.forgotPasswordLink = page.getByRole('link', { name: /forgot password|forgot/i });
     this.signupLink = page.getByRole('link', { name: /sign up|register|create account/i });
   }
@@ -28,7 +28,7 @@ export class LoginPage extends BasePage {
    * Navigate to login page
    */
   async goto(): Promise<void> {
-    await this.navigate('/#/auth/login');
+    await this.page.goto('https://rahulshettyacademy.com/client/#/auth/login');
   }
 
   /**

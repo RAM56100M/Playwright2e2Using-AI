@@ -1,5 +1,5 @@
 import { test as setup, expect } from '@playwright/test';
-import { testUsers } from '../utils/test-data';
+import { testUsers } from '../../utils/test-data';
 
 /**
  * Authentication Setup
@@ -9,38 +9,42 @@ import { testUsers } from '../utils/test-data';
  * Run with: npx playwright test --project=setup
  */
 setup('authenticate user', async ({ page, context }) => {
-  // Navigate to login page
-  await page.goto('/#/auth/login');
+  // Navigate to login page with full URL
+  await page.goto('https://rahulshettyacademy.com/client/#/auth/login');
+  
+  // Wait for page to load
+  await page.waitForLoadState('domcontentloaded');
 
   // Fill in login credentials
-  await page.locator('input[type="email"]').first().fill(testUsers.validUser.email);
-  await page.locator('input[type="password"]').first().fill(testUsers.validUser.password);
+  await page.fill('input[type="email"]', testUsers.validUser.email);
+  await page.fill('input[type="password"]', testUsers.validUser.password);
 
   // Submit login form
-  await page.getByRole('button', { name: /login|sign in/i }).first().click();
+  await page.click('input[type="submit"][name="login"]');
 
   // Verify successful login - wait for dashboard
-  await page.waitForURL('**/#/dashboard/**', { timeout: 10000 });
-  await expect(page).toHaveURL(/.*\/#\/dashboard.*/);
+  await page.waitForURL('**/client/#/dashboard/**', { timeout: 15000 });
 
   // Save authentication state to file for reuse in tests
   await context.storageState({ path: 'playwright/.auth/user.json' });
 });
 
 setup('authenticate admin', async ({ page, context }) => {
-  // Navigate to login page
-  await page.goto('/#/auth/login');
+  // Navigate to login page with full URL
+  await page.goto('https://rahulshettyacademy.com/client/#/auth/login');
+  
+  // Wait for page to load
+  await page.waitForLoadState('domcontentloaded');
 
-  // Fill in admin credentials (same as user for this app)
-  await page.locator('input[type="email"]').first().fill(testUsers.validAdmin.email);
-  await page.locator('input[type="password"]').first().fill(testUsers.validAdmin.password);
+  // Fill in admin credentials
+  await page.fill('input[type="email"]', testUsers.validAdmin.email);
+  await page.fill('input[type="password"]', testUsers.validAdmin.password);
 
   // Submit login form
-  await page.getByRole('button', { name: /login|sign in/i }).first().click();
+  await page.click('input[type="submit"][name="login"]');
 
   // Verify successful login
-  await page.waitForURL('**/#/dashboard/**', { timeout: 10000 });
-  await expect(page).toHaveURL(/.*\/#\/dashboard.*/);
+  await page.waitForURL('**/client/#/dashboard/**', { timeout: 15000 });
 
   // Save authentication state to file
   await context.storageState({ path: 'playwright/.auth/admin.json' });
