@@ -10,18 +10,18 @@ import { testUsers } from '../utils/test-data';
  */
 setup('authenticate user', async ({ page, context }) => {
   // Navigate to login page
-  await page.goto('/login');
+  await page.goto('/#/auth/login');
 
   // Fill in login credentials
-  await page.getByLabel('Email').fill(testUsers.validUser.email);
-  await page.getByLabel('Password').fill(testUsers.validUser.password);
+  await page.locator('input[type="email"]').first().fill(testUsers.validUser.email);
+  await page.locator('input[type="password"]').first().fill(testUsers.validUser.password);
 
   // Submit login form
-  await page.getByRole('button', { name: /sign in|login/i }).click();
+  await page.getByRole('button', { name: /login|sign in/i }).first().click();
 
-  // Verify successful login
-  await expect(page).toHaveURL('/dashboard');
-  await expect(page.getByRole('heading', { name: /welcome|dashboard/i })).toBeVisible();
+  // Verify successful login - wait for dashboard
+  await page.waitForURL('**/#/dashboard/**', { timeout: 10000 });
+  await expect(page).toHaveURL(/.*\/#\/dashboard.*/);
 
   // Save authentication state to file for reuse in tests
   await context.storageState({ path: 'playwright/.auth/user.json' });
@@ -29,18 +29,18 @@ setup('authenticate user', async ({ page, context }) => {
 
 setup('authenticate admin', async ({ page, context }) => {
   // Navigate to login page
-  await page.goto('/login');
+  await page.goto('/#/auth/login');
 
-  // Fill in admin credentials
-  await page.getByLabel('Email').fill(testUsers.validAdmin.email);
-  await page.getByLabel('Password').fill(testUsers.validAdmin.password);
+  // Fill in admin credentials (same as user for this app)
+  await page.locator('input[type="email"]').first().fill(testUsers.validAdmin.email);
+  await page.locator('input[type="password"]').first().fill(testUsers.validAdmin.password);
 
   // Submit login form
-  await page.getByRole('button', { name: /sign in|login/i }).click();
+  await page.getByRole('button', { name: /login|sign in/i }).first().click();
 
   // Verify successful login
-  await expect(page).toHaveURL('/dashboard');
-  await expect(page.getByRole('heading', { name: /welcome|dashboard/i })).toBeVisible();
+  await page.waitForURL('**/#/dashboard/**', { timeout: 10000 });
+  await expect(page).toHaveURL(/.*\/#\/dashboard.*/);
 
   // Save authentication state to file
   await context.storageState({ path: 'playwright/.auth/admin.json' });

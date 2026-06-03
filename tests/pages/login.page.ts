@@ -15,19 +15,20 @@ export class LoginPage extends BasePage {
 
   constructor(page: Page) {
     super(page);
-    this.emailInput = page.getByLabel('Email');
-    this.passwordInput = page.getByLabel('Password');
-    this.submitButton = page.getByRole('button', { name: /sign in|login/i });
-    this.errorMessage = page.getByRole('alert');
-    this.forgotPasswordLink = page.getByRole('link', { name: /forgot password/i });
-    this.signupLink = page.getByRole('link', { name: /sign up|create account/i });
+    // For Rahul Shetty Academy - try multiple selector approaches
+    this.emailInput = page.locator('input[type="email"]').first();
+    this.passwordInput = page.locator('input[type="password"]').first();
+    this.submitButton = page.getByRole('button', { name: /login|sign in/i }).first();
+    this.errorMessage = page.locator('.error, [role="alert"]').first();
+    this.forgotPasswordLink = page.getByRole('link', { name: /forgot password|forgot/i });
+    this.signupLink = page.getByRole('link', { name: /sign up|register|create account/i });
   }
 
   /**
    * Navigate to login page
    */
   async goto(): Promise<void> {
-    await this.navigate('/login');
+    await this.navigate('/#/auth/login');
   }
 
   /**
@@ -51,7 +52,8 @@ export class LoginPage extends BasePage {
    * Verify login was successful
    */
   async expectLoginSuccess(): Promise<void> {
-    await expect(this.page).toHaveURL('/dashboard');
+    // Wait for navigation to dashboard
+    await this.page.waitForURL('**/#/dashboard/**', { timeout: 10000 });
   }
 
   /**

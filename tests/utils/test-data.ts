@@ -5,13 +5,13 @@
 
 export const testUsers = {
   validUser: {
-    email: 'user@example.com',
-    password: 'SecurePass123!',
+    email: 'rampp@gmail.com',
+    password: 'Track20021',
     name: 'Test User',
   },
   validAdmin: {
-    email: 'admin@example.com',
-    password: 'AdminPass123!',
+    email: 'rampp@gmail.com',
+    password: 'Track20021',
     name: 'Admin User',
   },
   invalidUser: {
@@ -41,9 +41,9 @@ export const successMessages = {
 };
 
 export const testUrls = {
-  login: '/login',
-  dashboard: '/dashboard',
-  signup: '/signup',
-  forgotPassword: '/forgot-password',
+  login: '/#/auth/login',
+  dashboard: '/#/dashboard',
+  signup: '/#/auth/signup',
+  forgotPassword: '/#/auth/forgot-password',
   home: '/',
 };
